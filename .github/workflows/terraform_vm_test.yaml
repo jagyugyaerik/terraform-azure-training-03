@@ -39,9 +39,7 @@ jobs:
     - name: Terraform Validate
       run: terraform validate
     - name: Terraform Plan
-      run: terraform plan
-      env:
-        TF_VAR_env: prod
+      run: terraform plan -var-file=fixtures.tfvars
   terraform_apply:
     name: 'Terraform CD'
     needs: terraform_plan
@@ -74,4 +72,4 @@ jobs:
     - name: Terraform Validate
       run: terraform validate
     - name: Terraform Apply
-      run: terraform apply -auto-approve
+      run: terraform apply -auto-approve -var-file=fixtures.tfvars

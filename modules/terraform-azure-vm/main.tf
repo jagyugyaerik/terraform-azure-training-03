@@ -36,7 +36,7 @@ resource "azurerm_public_ip" "this" {
   location                = azurerm_resource_group.this.location
   resource_group_name     = azurerm_resource_group.this.name
   allocation_method       = "Dynamic"
-  idle_timeout_in_minutes = 25
+  idle_timeout_in_minutes = 30
 }
 
 resource "azurerm_windows_virtual_machine" "this" {
