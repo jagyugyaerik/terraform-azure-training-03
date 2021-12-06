@@ -1,0 +1,51 @@
+# Copyright 2021 Nordcloud Oy or its affiliates. All Rights Reserved.
+
+name: Provision Application Landing Zone
+on:
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        description: 'Name of project space tfvars file'
+        required: true
+        default: 'example_app'
+defaults:
+  run:
+    working-directory: ./
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    env:
+      TF_CLI_ARGS: '-no-color'
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      TFVARS_FILE_PATH: ./project_spaces
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+      - name: Setup subscription_id
+        run: |
+          subscription_id=$(awk '/subscription_id/{print $NF}' project_spaces/example_app.tfvars | tr -d '[:space:]' | tr -d '"')
+          if [[ ${subscription_id//-/} =~ ^[[:xdigit:]]{32}$ ]]; then
+          echo "ARM_SUBSCRIPTION_ID=$subscription_id" >> $GITHUB_ENV
+          else
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          fi
+          echo ${{ env.ARM_SUBSCRIPTION_ID }}
+      # - name: Install Terraform
+      #   uses: hashicorp/setup-terraform@v1
+      # - name: Terraform fmt
+      #   id: fmt
+      #   run: terraform fmt -check
+      # - name: Terraform Init
+      #   id: init
+      #   run: |
+      #     terraform init
+      # - name: Terraform Validate
+      #   id: validate
+      #   run: terraform validate
+      # - name: Terraform Apply
+      #   id: apply
+      #   run: terraform apply -auto-approve -var-file="${{ env.TFVARS_FILE_PATH }}/${{ github.event.inputs.environment_name }}.tfvars"
+      # - name: Terraform Force Copy
+      #   run: terraform init -force-copy
